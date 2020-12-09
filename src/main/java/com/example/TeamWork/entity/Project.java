@@ -1,24 +1,32 @@
 package com.example.TeamWork.entity;
-/*
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.persistence.*;
+import java.io.Serializable;
 import java.sql.Date;
 
 @Entity
 @Table(name = "projects")
-public class Project {
+public class Project  implements Serializable  {
     @Id
-    private int projectId;
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "customerId")
-    private Customer customer;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int Id;
     @Column
-    private String projectName;
+    private String projectname;
     @Column
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy")
     private  Date deadline;
     @Column
-    private Date projectStart;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy")
+    private Date projectstart;
     @Column
     private  int priority;
+
+
+  @ManyToOne( cascade = CascadeType.REFRESH)
+  @JoinColumn(name = "customer_Id", nullable = false)
+  private Customer customer;
 
 
     public int getPriority() {
@@ -31,27 +39,27 @@ public class Project {
     }
 
     public Date getProjectStart() {
-        return projectStart;
+        return projectstart;
     }
 
     public int getProjectId() {
-        return projectId;
+        return Id;
     }
 
     public String getProjectName() {
-        return projectName;
+        return projectname;
     }
 
     public void setProjectId(int projectId) {
-        this.projectId = projectId;
+        this.Id = projectId;
     }
 
     public void setProjectName(String projectName) {
-        this.projectName = projectName;
+        this.projectname = projectName;
     }
 
     public void setProjectStart(Date projectStart) {
-        this.projectStart = projectStart;
+        this.projectstart = projectStart;
     }
 
     public Date getDeadline() {
@@ -74,4 +82,4 @@ public class Project {
 }
 
 
-*/
+

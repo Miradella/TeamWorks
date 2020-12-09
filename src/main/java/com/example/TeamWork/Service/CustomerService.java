@@ -80,7 +80,7 @@ public class CustomerService {
   public void updatePhone(Integer id, String phonenumber)
     throws ResourceNotFoundException {
     Customer customer = findById(id);
-    customer.setPhone_number(phonenumber);
+    customer.setPhoneNumber(phonenumber);
     сustomerRepository.save(customer);
   }
 

@@ -25,8 +25,8 @@ public class CustomerSpecification implements Specification<Customer> {
       p.getExpressions().add(cb.like(root.get("name"), "%" + filter.getName() + "%"));
     }
 
-    if (filter.getPhone_number()!= null) {
-      p.getExpressions().add(cb.like(root.get("phone"), "%" + filter.getPhone_number() + "%"));
+    if (filter.getPhoneNumber()!= null) {
+      p.getExpressions().add(cb.like(root.get("phone"), "%" + filter.getPhoneNumber() + "%"));
     }
 
     return p;

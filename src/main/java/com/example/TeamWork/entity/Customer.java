@@ -1,19 +1,24 @@
 package com.example.TeamWork.entity;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import java.io.Serializable;
 
 @Entity
 @Table (name = "customers")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class Customer {
+public class Customer implements Serializable {
     private int Id;
     private String name;
-    private String phone_number;
+    private String phoneNumber;
     private String email;
-
+    /*@OneToMany(mappedBy = "customer")
+    private List<Project> projects;
   private static final long serialVersionUID = 4048798961366546485L;
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
@@ -32,18 +37,29 @@ public class Customer {
     }
 
     @Column
-    public String getPhone_number() {
-        return phone_number;
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
-    public void setPhone_number(String phone_number) {
-        this.phone_number = phone_number;
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     @Column
+    @Email
     public String getEmail() {
         return email;
     }
     public void setEmail(String email) {
         this.email = email;
     }
+/*
+  public List<Project> getProjects() {
+    return projects;
+  }
+
+  public void setProjects(List<Project> projects) {
+    this.projects = projects;
+  }
+
+ */
 }

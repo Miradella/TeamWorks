@@ -1,7 +1,7 @@
 package com.example.TeamWork.Controller;
 
-import com.example.TeamWork.Service.CustomerService;
-import com.example.TeamWork.entity.Customer;
+import com.example.TeamWork.Service.ProjectService;
+import com.example.TeamWork.entity.Project;
 import com.example.TeamWork.exception.BadResourceException;
 import com.example.TeamWork.exception.ResourceAlreadyExistsException;
 import com.example.TeamWork.exception.ResourceNotFoundException;
@@ -21,47 +21,53 @@ import java.net.URISyntaxException;
 import java.util.List;
 @RestController @CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping(value = "/api")
-public class CustomerController {
+public class ProjectController {
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   private final int ROW_PER_PAGE = 20;
 
   @Autowired
-  private CustomerService customerService;
+  private ProjectService projectService;
 
-  @GetMapping(value = "/customers", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/projects", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<List<Customer>> findAll(
+  public ResponseEntity<List<Project>> findAll(
     @RequestParam(value="page", defaultValue="1") int pageNumber,
     @RequestParam(required=false) String name) {
     if (StringUtils.isEmpty(name)) {
-      return ResponseEntity.ok(customerService.findAll(pageNumber, ROW_PER_PAGE));
+      return ResponseEntity.ok(projectService.findAll(pageNumber, ROW_PER_PAGE));
     }
     else {
-      return ResponseEntity.ok(customerService.findAllByName(name, pageNumber, ROW_PER_PAGE));
+      return ResponseEntity.ok(projectService.findAllByName(name, pageNumber, ROW_PER_PAGE));
     }
   }
-
-  @GetMapping(value = "/customers/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  /*
+  @GetMapping(value = "/projectsbycustomer/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Customer> findCustomerById(@PathVariable int customerId) {
+  public ResponseEntity<List<Project>> findbyCustomer(
+    @Valid @RequestBody Customer customer) {
+    return ResponseEntity.ok(projectService.findbyCustomer(customer));
+  } */
+  @GetMapping(value = "/projects/{projectId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<Project> findProjectById(@PathVariable int customerId) {
     try {
-      Customer customer = customerService.findById(customerId);
-      return ResponseEntity.ok(customer);  // return 200, with json body
+      Project project = projectService.findById(customerId);
+      return ResponseEntity.ok(project);  // return 200, with json body
     } catch (ResourceNotFoundException ex) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // return 404, with null body
     }
   }
 
-  @PostMapping(value = "/customers")
+  @PostMapping(value = "/projects")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Customer> addCustomer(@Valid @RequestBody Customer customer)
+  public ResponseEntity<Project> addProject(@Valid @RequestBody Project project)
     throws URISyntaxException {
     try {
-      Customer newContact = customerService.save(customer);
-      return ResponseEntity.created(new URI("/api/customers/" + newContact.getId()))
-        .body(customer);
+      Project newProject = projectService.save(project);
+      return ResponseEntity.created(new URI("/api/projects/" + newProject.getProjectId()))
+        .body(project);
     } catch (ResourceAlreadyExistsException ex) {
       // log exception first, then return Conflict (409)
       logger.error(ex.getMessage());
@@ -73,13 +79,13 @@ public class CustomerController {
     }
   }
 
-  @PutMapping(value = "/customers/{customerId}")
+  @PutMapping(value = "/projects/{projectId}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Customer> updateCustomer(@Valid @RequestBody Customer customer,
-                                               @PathVariable int customerId) {
+  public ResponseEntity<Project> updateProject(@Valid @RequestBody Project project,
+                                                 @PathVariable int projectId) {
     try {
-      customer.setId(customerId);
-      customerService.update(customer);
+      project.setProjectId(projectId);
+      projectService.update(project);
       return ResponseEntity.ok().build();
     } catch (ResourceNotFoundException ex) {
       // log exception first, then return Not Found (404)
@@ -92,25 +98,12 @@ public class CustomerController {
     }
   }
 
-  @PatchMapping("/customers/{customerId}")
-  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Void> updatePhone(@PathVariable int contactId,
-                                            @RequestBody String phone_number) {
-    try {
-      customerService.updatePhone(contactId, phone_number);
-      return ResponseEntity.ok().build();
-    } catch (ResourceNotFoundException ex) {
-      // log exception first, then return Not Found (404)
-      logger.error(ex.getMessage());
-      return ResponseEntity.notFound().build();
-    }
-  }
 
-  @DeleteMapping(path="/customers/{customerId}")
+  @DeleteMapping(path="/projects/{projectId}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Void> deleteCustomerById(@PathVariable int customerId) {
+  public ResponseEntity<Void> deleteProjectById(@PathVariable int projectId) {
     try {
-      customerService.deleteById(customerId);
+      projectService.deleteById(projectId);
       return ResponseEntity.ok().build();
     } catch (ResourceNotFoundException ex) {
       logger.error(ex.getMessage());
@@ -118,4 +111,5 @@ public class CustomerController {
     }
   }
 }
+
 
