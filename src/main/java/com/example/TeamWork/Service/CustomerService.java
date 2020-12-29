@@ -1,13 +1,12 @@
 package com.example.TeamWork.Service;
 
 import com.example.TeamWork.Repository.CustomerRepository;
-import com.example.TeamWork.Specification.CustomerSpecification;
 import com.example.TeamWork.entity.Customer;
-import com.example.TeamWork.exception.*;
+import com.example.TeamWork.exception.BadResourceException;
+import com.example.TeamWork.exception.ResourceAlreadyExistsException;
 import com.example.TeamWork.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -23,8 +22,10 @@ public class CustomerService {
     return сustomerRepository.existsById(id);
   }
 
-  public Customer findById(Integer id) throws ResourceNotFoundException {
+  public Customer findById(int id) throws ResourceNotFoundException {
+    System.out.println(id);
     Customer customer = сustomerRepository.findById(id).orElse(null);
+    System.out.println(customer.getName());
     if (customer==null) {
       throw new ResourceNotFoundException("Cannot find Contact with id: " + id);
     }
@@ -37,22 +38,13 @@ public class CustomerService {
     return customers;
   }
 
-  public List<Customer> findAllByName(String name, int pageNumber, int rowPerPage) {
-    Customer filter = new Customer();
-    filter.setName(name);
-    Specification<Customer> spec = new CustomerSpecification(filter);
-
-    List<Customer> customers = new ArrayList<>();
-    сustomerRepository.findAll(spec, PageRequest.of(pageNumber - 1, rowPerPage)).forEach(customers::add);
-    return customers;
-  }
-
   public Customer save(Customer customer) throws BadResourceException, ResourceAlreadyExistsException {
     if (!StringUtils.isEmpty(customer.getName())) {
       if (customer != null && existsById(customer.getId())) {
         throw new ResourceAlreadyExistsException("Contact with id: " + customer.getId() +
           " already exists");
       }
+      System.out.println(customer.getId());
       return сustomerRepository.save(customer);
     }
     else {
@@ -77,12 +69,6 @@ public class CustomerService {
     }
   }
 
-  public void updatePhone(Integer id, String phonenumber)
-    throws ResourceNotFoundException {
-    Customer customer = findById(id);
-    customer.setPhoneNumber(phonenumber);
-    сustomerRepository.save(customer);
-  }
 
   public void deleteById(Integer id) throws ResourceNotFoundException {
     if (!existsById(id)) {

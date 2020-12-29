@@ -1,84 +1,96 @@
 package com.example.TeamWork.entity;
-/*
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import java.sql.Date;
-import java.util.List;
 
 @Entity
 @Table(name = "tasks")
 public class Task {
-    @Id
-    private int taskId;
-    @Column
-    private int projectId;
-    @Column
-    private String taskName;
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "employeeId")
-    private People people;
-    @Column
-    private Date deadline;
-    @Column
-    private int priority;
 
-    @ManyToMany (mappedBy = "tasks")
-    private List<Team> teamList;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_id_seq")
+  @SequenceGenerator(name = "task_id_seq")
+  private int id;
+  @Column
+  private String taskname;
+  @Column
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy")
+  private Date deadline;
+  @Column
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy")
+  private int priority;
+  @Column
+  private String description;
 
-    public void setPriority(int priority) {
-        this.priority = priority;
-    }
+  @ManyToOne( cascade = CascadeType.REFRESH)
+  @JoinColumn(name = "employeeid")
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  private Employee employee;
 
-    public int getPriority() {
-        return priority;
-    }
+  @ManyToOne( cascade = CascadeType.REFRESH)
+  @JoinColumn(name = "projectid")
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  private Project project;
 
-    public void setProjectId(int projectId) {
-        this.projectId = projectId;
-    }
+  public void setPriority(int priority) {
+    this.priority = priority;
+  }
 
-    public int getProjectId() {
-        return projectId;
-    }
+  public int getPriority() {
+    return priority;
+  }
 
-    public Date getDeadline() {
-        return deadline;
-    }
+  public Date getDeadline() {
+    return deadline;
+  }
 
-    public int getTaskId() {
-        return taskId;
-    }
+  public int getTaskId() {
+    return id;
+  }
 
-    public String getTaskName() {
-        return taskName;
-    }
+  public String getTaskName() {
+    return taskname;
+  }
 
-    public void setTaskId(int taskId) {
-        this.taskId = taskId;
-    }
+  public void setTaskId(int taskId) {
+    this.id = taskId;
+  }
 
-    public void setTaskName(String taskName) {
-        this.taskName = taskName;
-    }
+  public void setTaskName(String taskName) {
+    this.taskname = taskName;
+  }
 
-    public void setDeadline(Date deadline) {
-        this.deadline = deadline;
-    }
+  public void setDeadline(Date deadline) {
+    this.deadline = deadline;
+  }
 
-    public List<Team> getTeamList() {
-        return teamList;
-    }
 
-    public void setTeamList(List<Team> teamList) {
-        this.teamList = teamList;
-    }
+  public Employee getEmployee() {
+    return employee;
+  }
 
-    public People getPeople() {
-        return people;
-    }
+  public void setEmployee(Employee employee) {
+    this.employee = employee;
+  }
 
-    public void setPeople(People people) {
-        this.people = people;
-    }
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public Project getProject() {
+    return project;
+  }
+
+  public void setProject(Project project) {
+    this.project = project;
+  }
 }
 
-*/

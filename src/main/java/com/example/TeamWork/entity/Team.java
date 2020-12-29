@@ -1,5 +1,7 @@
 package com.example.TeamWork.entity;
-/*
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -7,56 +9,72 @@ import java.util.List;
 @Table(name = "teams")
 public class Team {
     @Id
-    private int teamId;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "team_id_seq")
+    @SequenceGenerator(name = "team_id_seq")
+    private int id;
     @Column
-    private int maxCountOfPeople;
+    private int maxcountofpeople;
     @Column
     private String specialization;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable (name="tasks", joinColumns = @JoinColumn(name = "teamId"),
-            inverseJoinColumns = @JoinColumn(name="taskId"))
-    private List<Task> taskList;
+    /*
+    @OneToOne( cascade = CascadeType.REFRESH)
+    @JoinColumn(name = "leaderid")
+    private  Employee employee;
+*/
+    @OneToMany(mappedBy = "team", cascade = CascadeType.REMOVE)
+    @JsonIgnore
+    private List<Project> projects;
+  @OneToMany(mappedBy = "team", cascade = CascadeType.REFRESH)
+  @JsonIgnore
+  private List<Employee> employees;
     public String getSpecialization() {
         return specialization;
     }
 
     public void setTeamId(int teamId) {
-        this.teamId = teamId;
+        this.id = teamId;
     }
 
     public int getTeamId() {
-        return teamId;
+        return id;
     }
 
     public int getMaxCountOfPeople() {
-        return maxCountOfPeople;
+        return maxcountofpeople;
     }
 
     public void setMaxCountOfPeople(int maxCountOfPeople) {
-        this.maxCountOfPeople = maxCountOfPeople;
+        this.maxcountofpeople = maxCountOfPeople;
     }
 
     public void setSpecialization(String specialization) {
         this.specialization = specialization;
     }
 
-    public Team(int id){
-        this.teamId=id;
-    }
-    public Team(int id, int maxCountOfPeople, String specialization){
-        this.teamId=id;
-        this.maxCountOfPeople=maxCountOfPeople;
-        this.specialization=specialization;
-    }
+  public List<Project> getProjects() {
+    return projects;
+  }
 
-    public List<Task> getTaskList() {
-        return taskList;
-    }
+  public void setProjects(List<Project> projects) {
+    this.projects = projects;
+  }
 
-    public void setTaskList(List<Task> taskList) {
-        this.taskList = taskList;
-    }
+  public List<Employee> getEmployees() {
+    return employees;
+  }
+
+  public void setEmployees(List<Employee> employees) {
+    this.employees = employees;
+  }
+/*
+  public Employee getEmployee() {
+    return employee;
+  }
+
+  public void setEmployee(Employee employee) {
+    this.employee = employee;
+  }
+ */
 }
 
-*/
+

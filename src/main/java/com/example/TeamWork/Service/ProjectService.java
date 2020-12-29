@@ -1,14 +1,11 @@
 package com.example.TeamWork.Service;
 
 import com.example.TeamWork.Repository.ProjectRepository;
-import com.example.TeamWork.Specification.ProjectSpecification;
 import com.example.TeamWork.entity.Project;
 import com.example.TeamWork.exception.BadResourceException;
 import com.example.TeamWork.exception.ResourceAlreadyExistsException;
 import com.example.TeamWork.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -31,32 +28,23 @@ public class ProjectService {
     }
     else return project;
   }
-  /*
-  public List<Project> findbyCustomer(Customer customer) {
-    return projectRepository.findByCustomer(customer);
-  }*/
+  public  List<Project> findAllByTeam(Integer id, int pageNumber, int rowPerPage) throws ResourceNotFoundException {
+    TeamService teamService=new TeamService();
+    return projectRepository.findByTeam(teamService.findById(id));
+  }
+
   public List<Project> findAll(int pageNumber, int rowPerPage) {
     List<Project> projects = new ArrayList<>();
-    projectRepository.findAll(PageRequest.of(pageNumber - 1, rowPerPage)).forEach(projects::add);
+    projectRepository.findAll().forEach(projects::add);
     return projects;
   }
-
-  public List<Project> findAllByName(String name, int pageNumber, int rowPerPage) {
-    Project filter = new Project();
-    filter.setProjectName(name);
-    Specification<Project> spec = new ProjectSpecification(filter);
-
-    List<Project> projects = new ArrayList<>();
-    projectRepository.findAll(spec, PageRequest.of(pageNumber - 1, rowPerPage)).forEach(projects::add);
-    return projects;
-  }
-
   public Project save(Project project) throws BadResourceException, ResourceAlreadyExistsException {
     if (!StringUtils.isEmpty(project.getProjectName())) {
       if (project != null && existsById(project.getProjectId())) {
         throw new ResourceAlreadyExistsException("Contact with id: " + project.getProjectId() +
           " already exists");
       }
+      System.out.println(project.getProjectId());
       return projectRepository.save(project);
     }
     else {

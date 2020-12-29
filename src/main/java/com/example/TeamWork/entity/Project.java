@@ -1,17 +1,20 @@
 package com.example.TeamWork.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "projects")
 public class Project  implements Serializable  {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int Id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "project_id_seq")
+    @SequenceGenerator(name = "project_id_seq")
+    private int projectid;
     @Column
     private String projectname;
     @Column
@@ -25,9 +28,16 @@ public class Project  implements Serializable  {
 
 
   @ManyToOne( cascade = CascadeType.REFRESH)
-  @JoinColumn(name = "customer_Id", nullable = false)
+  @JoinColumn(name = "customerid")
   private Customer customer;
 
+  @ManyToOne( cascade = CascadeType.REFRESH)
+  @JoinColumn(name = "teamid")
+  private Team team;
+
+  @OneToMany(mappedBy = "project", cascade = CascadeType.REFRESH)
+  @JsonIgnore
+  private List<Task> tasks;
 
     public int getPriority() {
         return priority;
@@ -43,7 +53,7 @@ public class Project  implements Serializable  {
     }
 
     public int getProjectId() {
-        return Id;
+        return projectid;
     }
 
     public String getProjectName() {
@@ -51,7 +61,7 @@ public class Project  implements Serializable  {
     }
 
     public void setProjectId(int projectId) {
-        this.Id = projectId;
+        this.projectid = projectId;
     }
 
     public void setProjectName(String projectName) {
@@ -79,6 +89,22 @@ public class Project  implements Serializable  {
     public void setCustomer(Customer customer) {
         this.customer = customer;
     }
+
+  public Team getTeam() {
+    return team;
+  }
+
+  public void setTeam(Team team) {
+    this.team = team;
+  }
+
+  public List<Task> getTasks() {
+    return tasks;
+  }
+
+  public void setTasks(List<Task> tasks) {
+    this.tasks = tasks;
+  }
 }
 
 

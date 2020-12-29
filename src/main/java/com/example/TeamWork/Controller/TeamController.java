@@ -1,7 +1,7 @@
 package com.example.TeamWork.Controller;
 
-import com.example.TeamWork.Service.CustomerService;
-import com.example.TeamWork.entity.Customer;
+import com.example.TeamWork.Service.TeamService;
+import com.example.TeamWork.entity.Team;
 import com.example.TeamWork.exception.BadResourceException;
 import com.example.TeamWork.exception.ResourceAlreadyExistsException;
 import com.example.TeamWork.exception.ResourceNotFoundException;
@@ -18,80 +18,75 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping(value = "/api")
-public class CustomerController {
 
+public class TeamController {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   private final int ROW_PER_PAGE = 20;
 
   @Autowired
-  private CustomerService customerService;
+  private TeamService teamService;
 
-  @GetMapping(value = "/customers", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/teams", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<List<Customer>> findAll(
-    @RequestParam(value="page", defaultValue="1") int pageNumber) {
-      return ResponseEntity.ok(customerService.findAll(pageNumber, ROW_PER_PAGE));
+  public ResponseEntity<List<Team>> findAll(
+    @RequestParam(value = "page", defaultValue = "1") int pageNumber) {
+    return ResponseEntity.ok(teamService.findAll(pageNumber, ROW_PER_PAGE));
   }
-
-  @GetMapping(value = "/customers/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/teams/{teamId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Customer> findCustomerById(@PathVariable int customerId) {
+  public ResponseEntity<Team> findTeamById(@PathVariable int teamId) {
     try {
-      Customer customer = customerService.findById(customerId);
-      return ResponseEntity.ok(customer);  // return 200, with json body
+      Team team = teamService.findById(teamId);
+      return ResponseEntity.ok(team);  // return 200, with json body
     } catch (ResourceNotFoundException ex) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // return 404, with null body
     }
   }
 
-  @PostMapping(value = "/customers")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Customer> addCustomer(@Valid @RequestBody Customer customer)
+  @PostMapping(value = "/teams")
+  public ResponseEntity<Team> addProject(@Valid @RequestBody Team team)
     throws URISyntaxException {
     try {
-      System.out.println(customer.getId());
-      Customer newContact = customerService.save(customer);
-      return ResponseEntity.created(new URI("/api/customers/" + newContact.getId()))
-        .body(customer);
+      Team newTeam = teamService.save(team);
+      return ResponseEntity.created(new URI("/api/teams/" + newTeam.getTeamId())).body(team);
     } catch (ResourceAlreadyExistsException ex) {
-      // log exception first, then return Conflict (409)
       logger.error(ex.getMessage());
       return ResponseEntity.status(HttpStatus.CONFLICT).build();
     } catch (BadResourceException ex) {
-      // log exception first, then return Bad Request (400)
       logger.error(ex.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
   }
 
-  @PutMapping(value = "/customers/{customerId}")
+  @PutMapping(value = "/teams/{id}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Customer> updateCustomer(@Valid @RequestBody Customer customer,
-                                               @PathVariable int customerId) {
+  public ResponseEntity<Team> updateProject(@Valid @RequestBody Team team,
+                                               @PathVariable int id) {
     try {
-      customer.setId(customerId);
-      customerService.update(customer);
+      team.setTeamId(id);
+      teamService.update(team);
       return ResponseEntity.ok().build();
     } catch (ResourceNotFoundException ex) {
-      // log exception first, then return Not Found (404)
       logger.error(ex.getMessage());
       return ResponseEntity.notFound().build();
     } catch (BadResourceException ex) {
-      // log exception first, then return Bad Request (400)
       logger.error(ex.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
   }
 
-  @DeleteMapping(path="/customers/{customerId}")
+
+  @DeleteMapping(path = "/teams/{id}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Void> deleteCustomerById(@PathVariable int customerId) {
+  public ResponseEntity<Void> deleteTeamById(@PathVariable int id) {
     try {
-      customerService.deleteById(customerId);
+      teamService.deleteById(id);
       return ResponseEntity.ok().build();
     } catch (ResourceNotFoundException ex) {
       logger.error(ex.getMessage());
@@ -99,4 +94,3 @@ public class CustomerController {
     }
   }
 }
-

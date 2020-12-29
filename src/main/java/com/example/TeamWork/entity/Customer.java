@@ -1,58 +1,65 @@
 package com.example.TeamWork.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
-@Table (name = "customers")
+@Table(name = "customers")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Customer implements Serializable {
-    private int Id;
-    private String name;
-    private String phoneNumber;
-    private String email;
-    /*@OneToMany(mappedBy = "customer")
-    private List<Project> projects;
-  private static final long serialVersionUID = 4048798961366546485L;
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public int getId() {
-        return Id;
-    }
-    public void setId(int customerId) {
-        this.Id = customerId;
-    }
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private int Id;
+  @Column
+  private String name;
+  @Column
+  private String phoneNumber;
+  @Column
+  @Email
+  private String email;
 
-    @Column
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
+  @OneToMany(mappedBy = "customer", cascade = CascadeType.REMOVE)
+  @JsonIgnore
+  private List<Project> projects;
 
-    @Column
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
+  public int getId() {
+    return Id;
+  }
 
-    @Column
-    @Email
-    public String getEmail() {
-        return email;
-    }
-    public void setEmail(String email) {
-        this.email = email;
-    }
-/*
+  public void setId(int customerId) {
+    this.Id = customerId;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
+
+  public void setPhoneNumber(String phoneNumber) {
+    this.phoneNumber = phoneNumber;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
   public List<Project> getProjects() {
     return projects;
   }
@@ -60,6 +67,4 @@ public class Customer implements Serializable {
   public void setProjects(List<Project> projects) {
     this.projects = projects;
   }
-
- */
 }

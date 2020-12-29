@@ -1,7 +1,8 @@
 package com.example.TeamWork.Controller;
 
-import com.example.TeamWork.Service.CustomerService;
-import com.example.TeamWork.entity.Customer;
+import com.example.TeamWork.Service.EmployeeService;
+import com.example.TeamWork.Service.TeamService;
+import com.example.TeamWork.entity.Employee;
 import com.example.TeamWork.exception.BadResourceException;
 import com.example.TeamWork.exception.ResourceAlreadyExistsException;
 import com.example.TeamWork.exception.ResourceNotFoundException;
@@ -18,80 +19,90 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping(value = "/api")
-public class CustomerController {
-
+public class EmployeeController {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   private final int ROW_PER_PAGE = 20;
 
   @Autowired
-  private CustomerService customerService;
+  private EmployeeService employeeService;
+  @Autowired
+  private TeamService teamService;
 
-  @GetMapping(value = "/customers", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/employees", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<List<Customer>> findAll(
-    @RequestParam(value="page", defaultValue="1") int pageNumber) {
-      return ResponseEntity.ok(customerService.findAll(pageNumber, ROW_PER_PAGE));
+  public ResponseEntity<List<Employee>> findAll(
+    @RequestParam(value = "page", defaultValue = "1") int pageNumber) {
+      return ResponseEntity.ok(employeeService.findAll(pageNumber, ROW_PER_PAGE));
+
   }
-
-  @GetMapping(value = "/customers/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/employees/team/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Customer> findCustomerById(@PathVariable int customerId) {
+  public ResponseEntity<List<Employee>> findbyTeam(
+    @PathVariable int id,
+    @RequestParam(value = "page", defaultValue = "1") int pageNumber) {
+      try {
+        return ResponseEntity.ok(employeeService.findAllByTeam(teamService.findById(id), pageNumber, ROW_PER_PAGE));
+      } catch (ResourceNotFoundException e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+      }
+
+  }
+  @GetMapping(value = "/employees/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<Employee> findEmployeeById(@PathVariable int id) {
     try {
-      Customer customer = customerService.findById(customerId);
-      return ResponseEntity.ok(customer);  // return 200, with json body
+      Employee employee = employeeService.findById(id);
+      return ResponseEntity.ok(employee);
     } catch (ResourceNotFoundException ex) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // return 404, with null body
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
   }
 
-  @PostMapping(value = "/customers")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Customer> addCustomer(@Valid @RequestBody Customer customer)
+  @PostMapping(value = "/employees")
+  public ResponseEntity<Employee> addEmployee(@Valid @RequestBody Employee employee)
     throws URISyntaxException {
     try {
-      System.out.println(customer.getId());
-      Customer newContact = customerService.save(customer);
-      return ResponseEntity.created(new URI("/api/customers/" + newContact.getId()))
-        .body(customer);
+      Employee newEmployee = employeeService.save(employee);
+      return ResponseEntity.created(new URI("/api/employees/" + newEmployee.getEmployeeId())).body(employee);
     } catch (ResourceAlreadyExistsException ex) {
-      // log exception first, then return Conflict (409)
       logger.error(ex.getMessage());
       return ResponseEntity.status(HttpStatus.CONFLICT).build();
     } catch (BadResourceException ex) {
-      // log exception first, then return Bad Request (400)
       logger.error(ex.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
   }
 
-  @PutMapping(value = "/customers/{customerId}")
+  @PutMapping(value = "/employees/{id}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Customer> updateCustomer(@Valid @RequestBody Customer customer,
-                                               @PathVariable int customerId) {
+  public ResponseEntity<Employee> updateEmployee(@Valid @RequestBody Employee employee,
+                                            @PathVariable int id) {
     try {
-      customer.setId(customerId);
-      customerService.update(customer);
+      employee.setEmployeeId(id);
+      employeeService.update(employee);
       return ResponseEntity.ok().build();
     } catch (ResourceNotFoundException ex) {
-      // log exception first, then return Not Found (404)
       logger.error(ex.getMessage());
       return ResponseEntity.notFound().build();
     } catch (BadResourceException ex) {
-      // log exception first, then return Bad Request (400)
       logger.error(ex.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
   }
 
-  @DeleteMapping(path="/customers/{customerId}")
+
+  @DeleteMapping(path = "/employees/{id}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Void> deleteCustomerById(@PathVariable int customerId) {
+  public ResponseEntity<Void> deleteEmployeeById(@PathVariable int id) {
     try {
-      customerService.deleteById(customerId);
+      employeeService.deleteById(id);
       return ResponseEntity.ok().build();
     } catch (ResourceNotFoundException ex) {
       logger.error(ex.getMessage());
@@ -99,4 +110,3 @@ public class CustomerController {
     }
   }
 }
-

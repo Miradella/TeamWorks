@@ -19,7 +19,9 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-@RestController @CrossOrigin(origins = "http://localhost:4200")
+
+@RestController
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping(value = "/api")
 public class ProjectController {
 
@@ -33,47 +35,45 @@ public class ProjectController {
   @GetMapping(value = "/projects", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<List<Project>> findAll(
-    @RequestParam(value="page", defaultValue="1") int pageNumber,
-    @RequestParam(required=false) String name) {
-    if (StringUtils.isEmpty(name)) {
+    @RequestParam(value = "page", defaultValue = "1") int pageNumber,
+    @RequestParam(required = false) Integer team) {
+    if (StringUtils.isEmpty(team)) {
       return ResponseEntity.ok(projectService.findAll(pageNumber, ROW_PER_PAGE));
+    } else {
+
+      try {
+        return ResponseEntity.ok(projectService.findAllByTeam(team, pageNumber, ROW_PER_PAGE));
+      } catch (ResourceNotFoundException e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+      }
     }
-    else {
-      return ResponseEntity.ok(projectService.findAllByName(name, pageNumber, ROW_PER_PAGE));
-    }
+
   }
-  /*
-  @GetMapping(value = "/projectsbycustomer/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<List<Project>> findbyCustomer(
-    @Valid @RequestBody Customer customer) {
-    return ResponseEntity.ok(projectService.findbyCustomer(customer));
-  } */
+
   @GetMapping(value = "/projects/{projectId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Project> findProjectById(@PathVariable int customerId) {
+  public ResponseEntity<Project> findProjectById(@PathVariable int projectId) {
     try {
-      Project project = projectService.findById(customerId);
+      Project project = projectService.findById(projectId);
       return ResponseEntity.ok(project);  // return 200, with json body
     } catch (ResourceNotFoundException ex) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // return 404, with null body
     }
   }
 
-  @PostMapping(value = "/projects")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  @PostMapping(value = "/projects")
   public ResponseEntity<Project> addProject(@Valid @RequestBody Project project)
     throws URISyntaxException {
     try {
+      System.out.println(project.getProjectId());
       Project newProject = projectService.save(project);
-      return ResponseEntity.created(new URI("/api/projects/" + newProject.getProjectId()))
-        .body(project);
+      return ResponseEntity.created(new URI("/api/projects/" + newProject.getProjectId())).body(project);
     } catch (ResourceAlreadyExistsException ex) {
-      // log exception first, then return Conflict (409)
       logger.error(ex.getMessage());
       return ResponseEntity.status(HttpStatus.CONFLICT).build();
     } catch (BadResourceException ex) {
-      // log exception first, then return Bad Request (400)
       logger.error(ex.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
@@ -82,7 +82,7 @@ public class ProjectController {
   @PutMapping(value = "/projects/{projectId}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<Project> updateProject(@Valid @RequestBody Project project,
-                                                 @PathVariable int projectId) {
+                                               @PathVariable int projectId) {
     try {
       project.setProjectId(projectId);
       projectService.update(project);
@@ -99,7 +99,7 @@ public class ProjectController {
   }
 
 
-  @DeleteMapping(path="/projects/{projectId}")
+  @DeleteMapping(path = "/projects/{projectId}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<Void> deleteProjectById(@PathVariable int projectId) {
     try {
